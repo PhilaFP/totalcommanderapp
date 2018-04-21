@@ -1,0 +1,13 @@
+C:\Users\Filip\Documents\Visual Studio 2017\Projects\TotalCommanderApp\TotalCommanderApp\bin\Debug\TotalCommanderApp.exe.config
+C:\Users\Filip\Documents\Visual Studio 2017\Projects\TotalCommanderApp\TotalCommanderApp\bin\Debug\TotalCommanderApp.exe
+C:\Users\Filip\Documents\Visual Studio 2017\Projects\TotalCommanderApp\TotalCommanderApp\bin\Debug\TotalCommanderApp.pdb
+C:\Users\Filip\Documents\Visual Studio 2017\Projects\TotalCommanderApp\TotalCommanderApp\obj\Debug\TotalCommanderApp.csprojResolveAssemblyReference.cache
+C:\Users\Filip\Documents\Visual Studio 2017\Projects\TotalCommanderApp\TotalCommanderApp\obj\Debug\TotalCommanderApp.Form1.resources
+C:\Users\Filip\Documents\Visual Studio 2017\Projects\TotalCommanderApp\TotalCommanderApp\obj\Debug\TotalCommanderApp.Properties.Resources.resources
+C:\Users\Filip\Documents\Visual Studio 2017\Projects\TotalCommanderApp\TotalCommanderApp\obj\Debug\TotalCommanderApp.csproj.GenerateResource.cache
+C:\Users\Filip\Documents\Visual Studio 2017\Projects\TotalCommanderApp\TotalCommanderApp\obj\Debug\TotalCommanderApp.csproj.CoreCompileInputs.cache
+C:\Users\Filip\Documents\Visual Studio 2017\Projects\TotalCommanderApp\TotalCommanderApp\obj\Debug\TotalCommanderApp.exe
+C:\Users\Filip\Documents\Visual Studio 2017\Projects\TotalCommanderApp\TotalCommanderApp\obj\Debug\TotalCommanderApp.pdb
+C:\Users\Filip\Documents\Visual Studio 2017\Projects\TotalCommanderApp\TotalCommanderApp\bin\Debug\pl\TotalCommanderApp.resources.dll
+C:\Users\Filip\Documents\Visual Studio 2017\Projects\TotalCommanderApp\TotalCommanderApp\obj\Debug\TotalCommanderApp.Form1.pl.resources
+C:\Users\Filip\Documents\Visual Studio 2017\Projects\TotalCommanderApp\TotalCommanderApp\obj\Debug\pl\TotalCommanderApp.resources.dll
