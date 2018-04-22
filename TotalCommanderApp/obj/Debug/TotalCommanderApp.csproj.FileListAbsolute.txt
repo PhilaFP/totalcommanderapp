@@ -11,3 +11,4 @@ C:\Users\Filip\Documents\Visual Studio 2017\Projects\TotalCommanderApp\TotalComm
 C:\Users\Filip\Documents\Visual Studio 2017\Projects\TotalCommanderApp\TotalCommanderApp\bin\Debug\pl\TotalCommanderApp.resources.dll
 C:\Users\Filip\Documents\Visual Studio 2017\Projects\TotalCommanderApp\TotalCommanderApp\obj\Debug\TotalCommanderApp.Form1.pl.resources
 C:\Users\Filip\Documents\Visual Studio 2017\Projects\TotalCommanderApp\TotalCommanderApp\obj\Debug\pl\TotalCommanderApp.resources.dll
+C:\Users\Filip\Documents\Visual Studio 2017\Projects\TotalCommanderApp\TotalCommanderApp\obj\Debug\TotalCommanderApp.Form2.resources

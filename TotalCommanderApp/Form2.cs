@@ -12,9 +12,21 @@ namespace TotalCommanderApp
 {
     public partial class Form2 : Form
     {
+
         public Form2()
         {
             InitializeComponent();
         }
+
+        public ProgressBar GetProgressBar()
+        {
+            return progressBar1;
+        }
+
+        public void SetProgressBarValue(int value)
+        {
+            progressBar1.Value = value;
+        }
+
     }
 }

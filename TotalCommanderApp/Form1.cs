@@ -20,13 +20,24 @@ namespace TotalCommanderApp
         private FileAction fileAction;
         private ListView currentListView;
         private string currentPath;
+        private string otherPath;
         private string path1;
         private string path2;
+        private FileCopy fileCopy;
+        Form2 form2;
+        private int currentCopiedSize = 0;
+        private int allFilesSize = 0;
+        private ListViewColumnSorter lvwColumnSorter;
+        private CultureInfo cultureInfo = new CultureInfo("pl");
+
 
         public Form1()
         {
             InitializeComponent();
             InitializeComboboxes();
+            lvwColumnSorter = new ListViewColumnSorter();
+            this.listView1.ListViewItemSorter = lvwColumnSorter;
+            this.listView2.ListViewItemSorter = lvwColumnSorter;
         }
 
         private void InitializeComboboxes()
@@ -85,7 +96,7 @@ namespace TotalCommanderApp
             ComboBox currentCombobox = listView.Equals(listView1) ? comboBox1 : comboBox2;
             currentCombobox.Items.Add(currentPath);
             currentCombobox.SelectedIndex = currentCombobox.Items.IndexOf(currentPath);
-            
+
         }
 
 
@@ -110,9 +121,9 @@ namespace TotalCommanderApp
                 }
                 else
                 {
-                        MessageBox.Show("Nie można otworzyć pliku", "Błąd",
-                        MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    
+                    MessageBox.Show("Nie można otworzyć pliku", "Błąd",
+                    MessageBoxButtons.OK, MessageBoxIcon.Error);
+
                     return;
                 }
                 if (currentListView == listView1)
@@ -121,7 +132,61 @@ namespace TotalCommanderApp
             }
         }
 
-        private void DoCopy(string otherPath, Boolean shouldDelete)
+        private void listView1_ColumnClick(object sender,
+                   System.Windows.Forms.ColumnClickEventArgs e)
+        {
+            if (e.Column == lvwColumnSorter.SortColumn)
+            {
+                // Reverse the current sort direction for this column.
+                if (lvwColumnSorter.Order == SortOrder.Ascending)
+                {
+                    lvwColumnSorter.Order = SortOrder.Descending;
+                }
+                else
+                {
+                    lvwColumnSorter.Order = SortOrder.Ascending;
+                }
+            }
+            else
+            {
+                // Set the column number that is to be sorted; default to ascending.
+                lvwColumnSorter.SortColumn = e.Column;
+                lvwColumnSorter.Order = SortOrder.Ascending;
+                lvwColumnSorter.Culture = cultureInfo; 
+            }
+
+            // Perform the sort with these new sort options.
+            this.listView1.Sort();
+        }
+
+        private void listView2_ColumnClick(object sender,
+           System.Windows.Forms.ColumnClickEventArgs e)
+        {
+            if (e.Column == lvwColumnSorter.SortColumn)
+            {
+                // Reverse the current sort direction for this column.
+                if (lvwColumnSorter.Order == SortOrder.Ascending)
+                {
+                    lvwColumnSorter.Order = SortOrder.Descending;
+                }
+                else
+                {
+                    lvwColumnSorter.Order = SortOrder.Ascending;
+                }
+            }
+            else
+            {
+                // Set the column number that is to be sorted; default to ascending.
+                lvwColumnSorter.SortColumn = e.Column;
+                lvwColumnSorter.Order = SortOrder.Ascending;
+                lvwColumnSorter.Culture = cultureInfo;
+            }
+
+            // Perform the sort with these new sort options.
+            this.listView2.Sort();
+        }
+
+        private void DoCopy(Boolean shouldDelete)
         {
             string destination, source;
             if (currentListView == null)
@@ -141,46 +206,193 @@ namespace TotalCommanderApp
                 }
                 if (currentListView.SelectedItems[i].SubItems[1].Text == "DIR")
                 {
-                    string dirPath = currentListView.SelectedItems[i].Text + "\\";          
+                    string dirPath = currentListView.SelectedItems[i].Text + "\\";
                     source = currentPath + dirPath;
                     destination = otherPath + dirPath;
-                    fileAction.DirectoryCopy(source, destination);
-                    if (shouldDelete) Directory.Delete(source, true);
+                    fileCopy = new FileCopy(source, destination, true, shouldDelete);
+                    backgroundWorker1.RunWorkerAsync(form2);
+                    //if (shouldDelete) Directory.Delete(source, true);
                 }
                 else
                 {
                     string filePath = currentListView.SelectedItems[i].Text + currentListView.SelectedItems[i].SubItems[1].Text;
                     source = currentPath + filePath;
                     destination = otherPath + filePath;
-                    fileAction.FileCopy(source, destination);
-                    if (shouldDelete) File.Delete(source);
+                    fileCopy = new FileCopy(source, destination, false, shouldDelete);
+                    backgroundWorker1.RunWorkerAsync(form2);
+                    //if (shouldDelete) File.Delete(source);
                 }
             }
         }
 
         private void copy_Click(object sender, EventArgs e)
         {
-            String otherPath = currentListView.Equals(listView1) ? comboBox2.Text : comboBox1.Text;
+            form2 = new Form2();
+            form2.Show();
+
+            otherPath = currentListView.Equals(listView1) ? comboBox2.Text : comboBox1.Text;
             ListView otherListView = currentListView.Equals(listView1) ? listView2 : listView1;
 
-            DoCopy(otherPath, false);
+            DoCopy(false);
 
             fileAction = new FileAction(comboBox1, comboBox2);
             fileAction.ShowFiles(otherListView, otherPath);
         }
 
-
-        private void move_Click(object sender, EventArgs e)
+        private void backgroundWorker1_DoWork(object sender, DoWorkEventArgs e)
         {
-            String otherPath = currentListView.Equals(listView1) ? comboBox2.Text : comboBox1.Text;
-            ListView otherListView = currentListView.Equals(listView1) ? listView2 : listView1;
+            backgroundWorker1.WorkerReportsProgress = true;
+            if (fileCopy.getIsDirectory().Equals(true))
+            {
+                CountAllFilesSizes(fileCopy.getSourcePath(), fileCopy.getDestinationPath());
+                DoCopyDirByteByByte(fileCopy.getSourcePath(), fileCopy.getDestinationPath());
+                if (fileCopy.getShouldDelete()) Directory.Delete(fileCopy.getSourcePath(), true);
 
-            DoCopy(otherPath, true);
+            }
+            else
+            {
+                DoCopyFileByteByByte();
+                if (fileCopy.getShouldDelete()) File.Delete(fileCopy.getSourcePath());
+
+            }
+            currentCopiedSize = 0;
+            allFilesSize = 0;
+        }
+
+        private void DoCopyFileByteByByte()
+        {
+            FileInfo finInfo = new FileInfo(fileCopy.getSourcePath());
+
+            FileStream fin = new FileStream(fileCopy.getSourcePath(), FileMode.Open);
+            FileStream fout = new FileStream(fileCopy.getDestinationPath(), FileMode.Create);
+            int copiedByte;
+            
+            int numberOfBytesAlreadyCopied = 0;
+            int percentageDone = 0;
+            do
+            {
+                copiedByte = fin.ReadByte();
+                if (copiedByte != -1)
+                {
+                    fout.WriteByte((byte)copiedByte);
+
+                    numberOfBytesAlreadyCopied++;
+                    percentageDone = 100 * numberOfBytesAlreadyCopied / (int)finInfo.Length;
+                    backgroundWorker1.ReportProgress(percentageDone);
+                    Thread.Sleep(20);
+                }
+            } while (copiedByte != -1);
+
+            fin.Close();
+            fout.Close();
+        }
+
+       private void CountAllFilesSizes(string sourceDirName, string destDirName)
+        {
+            DirectoryInfo dir = new DirectoryInfo(sourceDirName);
+            DirectoryInfo[] dirs = dir.GetDirectories();
+            if (!Directory.Exists(destDirName))
+            {
+                Directory.CreateDirectory(destDirName);
+            }
+
+            FileInfo[] files = dir.GetFiles();
+
+            foreach (FileInfo file in files)
+            {
+                allFilesSize += (int)file.Length;
+            }
+
+            foreach (DirectoryInfo subdir in dirs)
+            {
+                string temppath = Path.Combine(destDirName, subdir.Name);
+                CountAllFilesSizes(subdir.FullName, temppath);
+            }
+
+        }
+
+        public void DoCopyDirByteByByte(string sourceDirName, string destDirName)
+        {
+            // Get the subdirectories for the specified directory.
+            DirectoryInfo dir = new DirectoryInfo(sourceDirName);
+
+            DirectoryInfo[] dirs = dir.GetDirectories();
+            // If the destination directory doesn't exist, create it.
+            if (!Directory.Exists(destDirName))
+            {
+                Directory.CreateDirectory(destDirName);
+            }
+
+            // Get the files in the directory and copy them to the new location.
+            FileInfo[] files = dir.GetFiles();
+
+            foreach (FileInfo file in files)
+            {
+                string temppath = Path.Combine(destDirName, file.Name);
+
+                FileStream fin = new FileStream(file.FullName, FileMode.Open);
+                FileStream fout = new FileStream(temppath, FileMode.Create);
+
+                int copiedByte;
+
+                int percentageDone = 0;
+                do
+                {
+                    copiedByte = fin.ReadByte();
+                    if (copiedByte != -1)
+                    {
+                        fout.WriteByte((byte)copiedByte);
+
+                        currentCopiedSize++;
+                        percentageDone = 100 * currentCopiedSize / allFilesSize;
+                        backgroundWorker1.ReportProgress(percentageDone);
+                        Thread.Sleep(20);
+                    }
+                } while (copiedByte != -1);
+
+                fin.Close();
+                fout.Close();
+            }
+
+            // If copying subdirectories, copy them and their contents to new location.
+
+            foreach (DirectoryInfo subdir in dirs)
+            {
+                string temppath = Path.Combine(destDirName, subdir.Name);
+                DoCopyDirByteByByte(subdir.FullName, temppath);
+            }
+
+        }
+
+        private void backgroundWorker1_ProgressChanged(object sender, ProgressChangedEventArgs e)
+        {
+            form2.SetProgressBarValue(e.ProgressPercentage);
+        }
+
+        private void backgroundWorker1_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
+        {
+            MessageBox.Show("Kopiowanie zakończone", "Sukces",
+                MessageBoxButtons.OK, MessageBoxIcon.Information);
 
             fileAction = new FileAction(comboBox1, comboBox2);
             fileAction.ShowFiles(listView1, path1);
             fileAction.ShowFiles(listView2, path2);
+        }
 
+
+        private void move_Click(object sender, EventArgs e)
+        {
+            form2 = new Form2();
+            form2.Show();
+
+            otherPath = currentListView.Equals(listView1) ? comboBox2.Text : comboBox1.Text;
+            ListView otherListView = currentListView.Equals(listView1) ? listView2 : listView1;
+
+            DoCopy(true);
+
+            fileAction = new FileAction(comboBox1, comboBox2);
+            fileAction.ShowFiles(listView1, path1);
+            fileAction.ShowFiles(listView2, path2);
         }
 
         private void delete_Click(object sender, EventArgs e)
@@ -197,7 +409,7 @@ namespace TotalCommanderApp
             {
                 MessageBox.Show("Nie można otworzyć katalogu wyżej", "Błąd",
                 MessageBoxButtons.OK, MessageBoxIcon.Error);
-                return;    
+                return;
             }
 
             DialogResult odp = MessageBox.Show("Czy jesteś pewien?", "Usuń", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
@@ -310,11 +522,13 @@ namespace TotalCommanderApp
         {
             if (sender == polishToolStripMenuItem)
             {
-                ChangeCulture(new CultureInfo("pl"));
+                cultureInfo = new CultureInfo("pl");
+                ChangeCulture(cultureInfo);
             }
             else
             {
-                ChangeCulture(new CultureInfo("en"));
+                cultureInfo = new CultureInfo("en");
+                ChangeCulture(cultureInfo);
             }
         }
 
